@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Environment Variables
+.env
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Build Artifacts
+build/
+dist/
+
+# Frontend
+node_modules/
+dashboard/node_modules/
+dashboard/dist/
+
+# Output Files
+output/
+
+# Large Assets / Videos
+CCTV Footage/
+*.mp4
+*.avi
+*.mov
+
+# ML Models
+*.pt
+*.pth
+*.onnx
+
+# IDE
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
+# Logs
+*.log
+
+# Cache
+.cache/
+
+# Agents / Internal
+.agents/

@@ -1,0 +1,309 @@
+# ===========================================================================
+# Apex Retail Store Intelligence — Pipeline Configuration
+# ===========================================================================
+# Store: Purplle — Brigade Road, Bangalore
+# Layout: Derived from store floor plan & CCTV frame analysis (10 Apr 2026)
+# All coordinates are in pixels (1920x1080 resolution)
+#
+# Reference: AGENTS.md, project-rules.md
+# ===========================================================================
+
+store:
+  store_id: "STORE_BLR_002"
+
+# ---------------------------------------------------------------------------
+# Camera Sources & Zone Definitions
+# ---------------------------------------------------------------------------
+# Camera mapping (confirmed from CCTV frame analysis):
+#
+#   CAM 1 → North wall interior (FarmStay → Aqualogica, F.O.H fragrance)
+#   CAM 2 → South wall interior (Alps → Maybelline, nail unit)
+#   CAM 3 → Store entrance (glass door, Purplle signage, entry mat)
+#   CAM 4 → Back office / stockroom (staff-only area)
+#   CAM 5 → Cash counter / billing (POS terminal, cashier)
+#
+# Zone types:
+#   entry_exit — Entry/exit gate (ENTRY, EXIT, REENTRY events)
+#   dwell      — Shopping area (ZONE_ENTER, ZONE_EXIT, ZONE_DWELL)
+#   billing    — Checkout zone (BILLING_QUEUE_JOIN, BILLING_QUEUE_ABANDON)
+#   staff_only — Staff-only area (all detections → is_staff inference)
+#
+# Polygon coordinates are [x, y] pixel positions on the 1920x1080 frame.
+# Derived from actual CCTV frame analysis, not placeholders.
+# ---------------------------------------------------------------------------
+
+cameras:
+  # -----------------------------------------------------------------
+  # CAM 3 — STORE ENTRANCE (Entry/Exit camera)
+  # -----------------------------------------------------------------
+  # View: Glass door with Purplle signage, entry mat, outside pavement.
+  # The door is center-left of frame. Inside store is top-left quadrant.
+  # Outside pavement is bottom-right. Entry = person crosses from
+  # outside (right) to inside (left) through the glass door area.
+  # -----------------------------------------------------------------
+  - camera_id: "CAM_ENTRY_01"
+    source: "CCTV Footage/CAM 3.mp4"
+    clip_start_time: "2026-04-10T20:10:00Z"
+    fps_override: 30.0
+    zones:
+      # Entry/exit zone: the glass door threshold area
+      # Door frame spans roughly x:500-800, floor area y:300-700
+      - zone_id: "ENTRY"
+        type: "entry_exit"
+        polygon: [[450, 250], [850, 250], [850, 720], [450, 720]]
+      # Inside-store region visible from entrance cam (top-left)
+      # Used to confirm person has fully entered
+      - zone_id: "ENTRY_VESTIBULE"
+        type: "dwell"
+        polygon: [[0, 0], [450, 0], [450, 600], [0, 600]]
+
+  # -----------------------------------------------------------------
+  # CAM 1 — NORTH WALL (Skincare & K-Beauty zone)
+  # -----------------------------------------------------------------
+  # View: Top-down angle facing the north wall shelving.
+  # Visible brands: FarmStay, The Face Shop, Good Vibes, DermaCo,
+  #                 Minimalist, Aqualogica
+  # Center: F.O.H fragrance table (circular display, "Summer" banner)
+  # Right edge: DermaCo/Aqualogica area, makeup table with stool
+  # -----------------------------------------------------------------
+  - camera_id: "CAM_FLOOR_01"
+    source: "CCTV Footage/CAM 1.mp4"
+    clip_start_time: "2026-04-10T20:10:00Z"
+    fps_override: 30.0
+    zones:
+      # K-Beauty / Korean Skincare zone (left portion of wall)
+      # FarmStay + The Face Shop shelves: x:0-500, y:50-550
+      - zone_id: "KBEAUTY"
+        type: "dwell"
+        polygon: [[0, 50], [500, 50], [500, 550], [0, 550]]
+        sku_zone: "KOREAN_SKINCARE"
+      # Clean Beauty zone (center of wall)
+      # Good Vibes + DermaCo: x:500-950, y:50-550
+      - zone_id: "CLEAN_BEAUTY"
+        type: "dwell"
+        polygon: [[500, 50], [950, 50], [950, 550], [500, 550]]
+        sku_zone: "CLEAN_BEAUTY"
+      # Clinical Skincare zone (right portion)
+      # Minimalist + Aqualogica: x:950-1450, y:50-550
+      - zone_id: "SKINCARE"
+        type: "dwell"
+        polygon: [[950, 50], [1450, 50], [1450, 550], [950, 550]]
+        sku_zone: "CLINICAL_SKINCARE"
+      # F.O.H Fragrance table (center-bottom, circular display)
+      # Approximate bounding region: x:400-850, y:550-950
+      - zone_id: "FRAGRANCE"
+        type: "dwell"
+        polygon: [[400, 550], [850, 550], [850, 950], [400, 950]]
+        sku_zone: "FRAGRANCE"
+      # DermaCo / Makeup table (right edge)
+      # Table area: x:1450-1920, y:400-900
+      - zone_id: "MAKEUP_STATION_NORTH"
+        type: "dwell"
+        polygon: [[1450, 400], [1920, 400], [1920, 900], [1450, 900]]
+        sku_zone: "MAKEUP"
+
+  # -----------------------------------------------------------------
+  # CAM 2 — SOUTH WALL (Makeup & Color Cosmetics zone)
+  # -----------------------------------------------------------------
+  # View: Top-down angle facing the south wall shelving.
+  # Visible brands (right to left in frame): Alps, L'Oreal, Swiss Beauty,
+  #                 Lakme, Faces Canada, Maybelline
+  # Center: Nail unit table / promotional display ("Summer Essentials")
+  # Left edge: Alps hair care area with counter
+  # -----------------------------------------------------------------
+  - camera_id: "CAM_FLOOR_02"
+    source: "CCTV Footage/CAM 2.mp4"
+    clip_start_time: "2026-04-10T20:10:00Z"
+    fps_override: 30.0
+    zones:
+      # Maybelline + Faces Canada (right side of frame)
+      # x:1050-1920, y:50-600
+      - zone_id: "COLOR_COSMETICS"
+        type: "dwell"
+        polygon: [[1050, 50], [1920, 50], [1920, 600], [1050, 600]]
+        sku_zone: "LIPS_EYES"
+      # Lakme + Swiss Beauty (center of wall)
+      # x:550-1050, y:50-600
+      - zone_id: "MAKEUP_MAINSTREAM"
+        type: "dwell"
+        polygon: [[550, 50], [1050, 50], [1050, 600], [550, 600]]
+        sku_zone: "LAKME_SWISS"
+      # L'Oreal + Alps (left side of frame, near hair care counter)
+      # x:0-550, y:50-600
+      - zone_id: "HAIRCARE"
+        type: "dwell"
+        polygon: [[0, 50], [550, 50], [550, 600], [0, 600]]
+        sku_zone: "HAIRCARE"
+      # Nail unit / promotional table (center-bottom)
+      # x:350-850, y:600-1000
+      - zone_id: "PROMO_TABLE"
+        type: "dwell"
+        polygon: [[350, 600], [850, 600], [850, 1000], [350, 1000]]
+        sku_zone: "FRAGRANCE_PROMO"
+
+  # -----------------------------------------------------------------
+  # CAM 5 — CASH COUNTER / BILLING
+  # -----------------------------------------------------------------
+  # View: Close-up of the POS terminal / cashier station.
+  # Visible: Laptop/POS, cashier (staff in black), product shelves
+  #          behind counter (Foxtale, Vinci, Mamaearth), "ACCESSORIES"
+  #          LED display on right.
+  # Behind counter leads to stockroom (doorway visible center-right).
+  # -----------------------------------------------------------------
+  - camera_id: "CAM_BILLING_01"
+    source: "CCTV Footage/CAM 5.mp4"
+    clip_start_time: "2026-04-10T20:10:00Z"
+    fps_override: 25.0
+    zones:
+      # Billing counter area — the customer-facing side
+      # POS terminal and counter: x:0-750, y:200-800
+      - zone_id: "BILLING"
+        type: "billing"
+        polygon: [[0, 200], [750, 200], [750, 800], [0, 800]]
+      # Behind-counter area (staff side + stockroom door)
+      # x:750-1920, y:0-1080 — anyone here is likely staff
+      - zone_id: "BEHIND_COUNTER"
+        type: "staff_only"
+        polygon: [[750, 0], [1920, 0], [1920, 1080], [750, 1080]]
+      # Accessories display (right side LED panel)
+      # x:1200-1920, y:300-900
+      - zone_id: "ACCESSORIES"
+        type: "dwell"
+        polygon: [[1200, 300], [1920, 300], [1920, 900], [1200, 900]]
+        sku_zone: "ACCESSORIES"
+
+  # -----------------------------------------------------------------
+  # CAM 4 — BACK OFFICE / STOCKROOM (Staff-only)
+  # -----------------------------------------------------------------
+  # View: Storage room with Purplle boxes, chair, water dispenser.
+  # This is the "Access" area from the store layout — staff-only zone.
+  # Every person detected here is staff. Used for staff identification
+  # (anyone seen here + later on floor = definite staff).
+  # -----------------------------------------------------------------
+  - camera_id: "CAM_BACKOFFICE"
+    source: "CCTV Footage/CAM 4.mp4"
+    clip_start_time: "2026-04-10T20:10:00Z"
+    fps_override: 25.0
+    zones:
+      # Entire frame is staff-only area
+      - zone_id: "STOCKROOM"
+        type: "staff_only"
+        polygon: [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
+
+# ---------------------------------------------------------------------------
+# Detection — YOLOv8
+# ---------------------------------------------------------------------------
+
+detection:
+  model: "yolov8n.pt"           # yolov8n (fast) | yolov8s/m/l/x (accurate)
+  person_class_id: 0            # COCO class 0 = person
+  frame_skip: 2                 # Process every 2nd frame (30fps → 15 effective)
+  confidence_threshold: 0.0     # Hard Rule #4: NEVER suppress low-confidence
+
+# ---------------------------------------------------------------------------
+# Tracking — ByteTrack
+# ---------------------------------------------------------------------------
+
+tracking:
+  tracker_config: "bytetrack.yaml"
+  persist: true
+
+# ---------------------------------------------------------------------------
+# Re-ID — OSNet
+# ---------------------------------------------------------------------------
+
+reid:
+  model_name: "osnet_x1_0"
+  similarity_threshold: 0.7     # Cosine > 0.7 = same person (build-pipeline.md)
+  gallery_update_interval: 30   # Refresh embedding every 30 frames
+
+# ---------------------------------------------------------------------------
+# Staff Detection — HSV Uniform Classification
+# ---------------------------------------------------------------------------
+# From CCTV analysis: Staff at Purplle Brigade Road wear BLACK uniforms.
+# Cashier in CAM 5 and staff in CAM 4 both wearing all-black attire.
+# HSV ranges tuned for black clothing detection.
+# ---------------------------------------------------------------------------
+
+staff:
+  method: "hsv_uniform"
+  hsv_ranges:
+    # Black uniform detection (low saturation, low value)
+    - lower: [0, 0, 0]
+      upper: [180, 100, 80]
+    # Very dark navy/charcoal (slight blue tint)
+    - lower: [100, 10, 0]
+      upper: [140, 120, 80]
+  min_uniform_ratio: 0.45       # 45% of torso must match black uniform
+
+# ---------------------------------------------------------------------------
+# Zone Behavior
+# ---------------------------------------------------------------------------
+
+zones:
+  dwell_threshold_ms: 3000      # 3s minimum for ZONE_DWELL event
+  entry_exit_direction: "right"  # Entry from right side of CAM 3 frame (outside → inside)
+
+# ---------------------------------------------------------------------------
+# Edge Case Thresholds (from AGENTS.md § Hard Rules #8)
+# ---------------------------------------------------------------------------
+
+edge_cases:
+  group_entry_time_window_s: 2.0     # #1: Group entry window
+  reentry_cooldown_s: 300.0          # #3: Re-entry = same person within 5 min
+  empty_period_threshold_s: 1800.0   # #6: No activity for 30 min
+  camera_offline_threshold_s: 600.0  # #7: Camera silent for 10 min
+
+# ---------------------------------------------------------------------------
+# Camera Overlap Mapping
+# ---------------------------------------------------------------------------
+# Overlap regions identified from store layout + CCTV analysis:
+#
+#   CAM 1 ↔ CAM 2: Overlap at F.O.H center (fragrance table visible in both)
+#                   The circular "Summer Essentials" promo table is visible
+#                   in both cameras from opposite angles.
+#
+#   CAM 5 ↔ CAM 4: Overlap at stockroom doorway (visible in CAM 5 center-right,
+#                   leads to the storage area in CAM 4)
+#
+#   CAM 3 ↔ CAM 1/CAM 2: Partial overlap — CAM 3 top-left shows inside store
+#                          which is also visible from floor cameras.
+#
+# Handling: Re-ID gallery is shared across ALL cameras. Same visitor_id is
+# assigned when cosine similarity > 0.7 regardless of which camera detects them.
+# ---------------------------------------------------------------------------
+
+camera_overlaps:
+  - cameras: ["CAM_FLOOR_01", "CAM_FLOOR_02"]
+    region: "FOH_CENTER"
+    description: "Fragrance/promo table visible from both floor cameras"
+  - cameras: ["CAM_BILLING_01", "CAM_BACKOFFICE"]
+    region: "STOCKROOM_DOOR"
+    description: "Doorway between billing counter and stockroom"
+  - cameras: ["CAM_ENTRY_01", "CAM_FLOOR_01"]
+    region: "ENTRY_INSIDE"
+    description: "Just inside entrance, visible from entry cam and north floor cam"
+  - cameras: ["CAM_ENTRY_01", "CAM_FLOOR_02"]
+    region: "ENTRY_SOUTH"
+    description: "Entry area overlaps with south wall camera near Maybelline"
+
+# ---------------------------------------------------------------------------
+# Blind Spots (documented from layout + CCTV analysis)
+# ---------------------------------------------------------------------------
+# 1. Far corners of north wall — FarmStay (extreme left in CAM 1) has
+#    partial coverage, may miss visitors at the very edge
+# 2. Behind F.O.H makeup units — the area between the two makeup chairs
+#    is partially occluded in both floor cameras
+# 3. Narrow passage between billing counter and stockroom — partially
+#    visible in CAM 5 but may lose tracking during transition
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
+
+output:
+  output_dir: "output"
+  events_file: "events.jsonl"
+  emit_to_api: false
+  api_url: "http://localhost:8000/events/ingest"

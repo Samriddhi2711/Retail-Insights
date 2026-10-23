@@ -1,0 +1,127 @@
+# ==========================================
+# Python
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# ==========================================
+# Virtual Environments
+# ==========================================
+.venv/
+venv/
+env/
+
+# ==========================================
+# Environment Variables
+# ==========================================
+.env
+
+# ==========================================
+# Database Files
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# Generated Pipeline Output
+# ==========================================
+output/
+*.jsonl
+
+# ==========================================
+# Frontend
+# ==========================================
+node_modules/
+dashboard/node_modules/
+
+dist/
+build/
+dashboard/dist/
+
+# ==========================================
+# IDE
+# ==========================================
+.vscode/
+.idea/
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# CCTV Videos (large files)
+# ==========================================
+CCTV Footage/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# ==========================================
+# ML Models (large files)
+# ==========================================
+*.pt
+*.pth
+*.onnx
+
+# ==========================================
+# Logs
+# ==========================================
+*.log
+
+# ==========================================
+# Temporary Files
+# ==========================================
+tmp/
+temp/
+
+# ==========================================
+# Docker Cache
+# ==========================================
+docker-data/
+
+# ==========================================
+# DO NOT IGNORE THESE
+# ==========================================
+!.env.example
+!README.md
+!docker-compose.yml
+!Dockerfile
+!requirements.txt
+!requirements-docker.txt
+!AGENTS.md
+
+# Keep documentation
+!docs/
+!docs/**
+
+# Keep dashboard source
+!dashboard/src/**
+!dashboard/package.json
+!dashboard/package-lock.json
+!dashboard/vite.config.*
+!dashboard/tsconfig*.json
+
+# Keep tests
+!tests/**
+
+# Keep app and pipeline
+!app/**
+!pipeline/**
+!scripts/**
+
+
+*.xlsx
+*.csv
+!Brigade_Bangalore_10_April_26*.csv
+.agents/
+AGENTS.md
