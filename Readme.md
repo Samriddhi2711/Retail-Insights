@@ -474,7 +474,8 @@ Full details documented in:
 ---
 
 <p align="center">
-  <strong>Built by Sanyam Jain</strong><br/>
+  <strong>Built by Samriddhi Tripathi </strong><br/>
   IIIT Bhagalpur<br/><br/>
-  <em>Apex Retail Store Intelligence Challenge</em>
+  <em>Store Intelligence Challenge</em>
 </p>
+
